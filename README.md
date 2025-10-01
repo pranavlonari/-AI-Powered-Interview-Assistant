@@ -1,55 +1,96 @@
-AI-Powered Interview Assistant
+# AI-Powered Interview Assistant  
+**Author:** Pranav Lonari  
 
-Goal: Build a React app that works as an AI-powered interview assistant. It must:
-Provide two tabs: Interviewee (chat) and Interviewer (dashboard). Both stay synced.
+---
 
-Interviewee (chat)
-Let a candidate upload a resume (PDF required, DOCX optional).
-Extract Name, Email, Phone from the resume; if anything is missing, the chatbot
-collects it before starting the interview.
-Run a timed interview where AI generates questions and judges answers.
+## Overview  
+This project is a **React-based AI Interview Assistant** that helps conduct mock technical interviews in a structured and automated way. It provides two synchronized views:  
 
-Interviewer (dashboard)
-List of candidates ordered by score.
-Ability to view each candidate's chat history, profile, and final AI summary.
-Persist all data locally so closing/reopening restores progress.
-Support pause/resume with a Welcome Back modal.
+- **Interviewee (Chat)** – where candidates upload resumes, answer AI-generated interview questions, and track their progress with timers.  
+- **Interviewer (Dashboard)** – where interviewers can monitor candidates, view scores, chat history, and summaries.  
 
-Core Requirements
-Resume Upload: Accept PDF/DOCX. Extract following fields - Name, Email, Phone.
-Missing Fields: Chatbot prompts candidates to fill gaps before the interview starts. Like
-if the phone number is missing, it should 1st ask for it before starting the interview.
+The application supports **local persistence**, so all progress is saved even after a page refresh or browser restart.  
 
-● Interview Flow
-AI will dynamically generate questions for full stack (React/Node) role 1 by 1  
- 6 questions total: 2 Easy → 2 Medium → 2 Hard.
-Questions are shown one at a time in the chat.
-Timers per question: Easy 20 s, Medium 60 s, Hard 120 s.
-When time runs out, the system automatically submits the answer and moves on.
-After the 6th question, the AI calculates a final score and creates a short
-summary of the candidate.
-App contains Two Tabs
-Interviewee Tab
-Candidate chat flow — questions, answers, timers, and progress.
+---
 
-Interviewer Tab (Dashboard)
-Shows a list of all candidates with their final score and summary.
+## Features  
 
-Clicking on a candidate opens a detailed view showing all questions,
-answers, and AI scores for that candidate.
-Search and sort functionality included.
+### 🔹 Interviewee (Chat)  
+- **Resume Upload (PDF/DOCX):**  
+  - Extracts **Name, Email, and Phone** from the uploaded resume.  
+  - If any details are missing, the chatbot asks the candidate before starting.  
+- **Interview Flow:**  
+  - 6 questions total → **2 Easy (20s each)**, **2 Medium (60s each)**, **2 Hard (120s each)**.  
+  - AI dynamically generates one question at a time.  
+  - Automatic submission when time runs out.  
+  - At the end, AI calculates a **final score** and generates a **short summary**.  
+- **Session Persistence:**  
+  - If the candidate refreshes or closes the page, progress is restored on reopening.  
+  - A **“Welcome Back” modal** helps resume the session.  
+- **Tab-Switch Detection:**  
+  - If the candidate switches browser tabs during the interview, the test is **instantly auto-submitted** to prevent cheating.  
 
-Persistence (Data Storage)
-Use any state management lib to save all timers, answers, and progress locally.
+### 🔹 Interviewer (Dashboard)  
+- **Candidate List:** Ordered by score with summaries.  
+- **Detailed Candidate View:**  
+  - Profile details (Name, Email, Phone).  
+  - Chat history (Questions, Answers, AI evaluation).  
+  - Final score and summary.  
+- **Search & Sort:** Quickly find candidates by name, email, or score.  
+- **Local Data Storage:** Uses persistent state so interview data is not lost.  
 
-If a candidate refreshes or closes the page, everything is restored on reopening.
+---
 
-Show a “Welcome Back” modal for unfinished sessions.
-Tech
+## Tech Stack  
 
-You are free to use any libraries or tools you prefer.
-Suggested stack: React + Redux (state & persistence, e.g., redux-persist /
-IndexedDB).
-Suggested UI: Ant Design or shadcn (or any other modern UI library).
-Build a clean, responsive UI (basic chat + tables).
-Implement friendly error handling (invalid files, missing fields)
+- **Frontend:** React  
+- **State Management & Persistence:** Redux + redux-persist / IndexedDB  
+- **UI Components:** Ant Design / shadcn (modern responsive UI)  
+- **Resume Parsing:** PDF/DOCX text extraction libraries  
+- **AI Logic:** Dynamic question generation & scoring system  
+- **Storage:** Local persistence for timers, answers, and progress  
+
+---
+
+## Installation & Setup  
+
+1. Clone this repository:  
+   ```bash
+   git clone https://github.com/your-username/interview-assistant.git
+   cd interview-assistant
+   ```
+2. Install dependencies:  
+   ```bash
+   npm install
+   ```
+3. Run the app:  
+   ```bash
+   npm start
+   ```
+4. Open in browser:  
+   ```
+   http://localhost:3000
+   ```
+
+---
+
+## Usage  
+
+1. Go to the **Interviewee tab** → Upload resume → Fill missing fields if asked → Start interview.  
+2. Answer questions within time limits (auto-submit if time runs out).  
+3. After 6 questions, final score + AI summary is shown.  
+4. Switching browser tabs during the test will **instantly auto-submit** the interview.  
+5. Switch to the **Interviewer tab** → View candidate list, search/sort, and explore detailed reports.  
+6. Resume unfinished interviews anytime with **Welcome Back modal**.  
+
+---
+
+## Error Handling  
+
+- Invalid resume formats → Friendly error messages.  
+- Missing fields → Chatbot requests them before interview starts.  
+- Timers + auto-submit prevent blocking interview flow.  
+- Tab switch → Immediate auto-submission to ensure fairness.  
+
+---
+
