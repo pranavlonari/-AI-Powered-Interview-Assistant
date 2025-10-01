@@ -257,8 +257,16 @@ const InterviewChat: React.FC<InterviewChatProps> = ({
       return;
     }
 
+    // Get CURRENT questionIndex from Redux store (not from component state/props)
+    // This ensures we use the latest value after submitAnswer increments it
+    const latestQuestionIndex = candidate.currentQuestionIndex;
+
+    console.log(
+      `📊 Using latest questionIndex: ${latestQuestionIndex} (was: ${currentQuestionIndex})`
+    );
+
     // Safety check: Don't generate more questions than configured
-    if (currentQuestionIndex >= totalQuestions) {
+    if (latestQuestionIndex >= totalQuestions) {
       console.log(
         `⚠️ Already at max questions (${totalQuestions}), not generating more`
       );
@@ -266,11 +274,11 @@ const InterviewChat: React.FC<InterviewChatProps> = ({
     }
 
     isGeneratingRef.current = true;
-    const difficulty = getQuestionDifficulty(currentQuestionIndex);
+    const difficulty = getQuestionDifficulty(latestQuestionIndex);
     console.log(
       `🎯 Requesting ${difficulty} question for question ${
-        currentQuestionIndex + 1
-      } (index: ${currentQuestionIndex})`
+        latestQuestionIndex + 1
+      } (index: ${latestQuestionIndex})`
     );
     console.log(
       `📊 Questions answered: ${candidate.answers.length}, Easy: ${
