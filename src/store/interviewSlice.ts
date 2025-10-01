@@ -395,12 +395,21 @@ const interviewSlice = createSlice({
     builder
       .addCase(generateQuestion.fulfilled, (state, action) => {
         console.log("✅ Question generated and set in state");
+        console.log(
+          `⏱️ Timer initialization: difficulty=${action.payload.difficulty}, timeLimit=${action.payload.timeLimit}s`
+        );
+        console.log(
+          `⏱️ Current question index: ${state.currentCandidate?.currentQuestionIndex}, Total questions: ${state.config.totalQuestions}`
+        );
         state.currentQuestion = action.payload;
         state.timer = {
           isRunning: true,
           timeLeft: action.payload.timeLimit,
           totalTime: action.payload.timeLimit,
         };
+        console.log(
+          `⏱️ Timer set: ${state.timer.timeLeft}s (difficulty: ${action.payload.difficulty})`
+        );
       })
       .addCase(generateQuestion.rejected, (_, action) => {
         console.error("❌ Question generation failed:", action.payload);
