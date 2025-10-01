@@ -79,7 +79,7 @@ export const generateQuestion = createAsyncThunk(
         id: generateId(),
         question: response.question,
         difficulty: response.difficulty,
-        timeLimit: initialConfig.timeLimits[difficulty],
+        timeLimit: initialConfig.timeLimits[response.difficulty],
         category: "Full Stack Development",
         options: response.options, // MCQ options for easy questions
         correctAnswer: response.correctAnswer, // Correct answer for MCQ
@@ -274,8 +274,19 @@ const interviewSlice = createSlice({
           `   Current question index: ${state.currentCandidate.currentQuestionIndex}`
         );
 
-        // Sync the counter to match answered questions
-        aiService.syncQuestionCounter(easyCount, mediumCount, hardCount);
+        // Reset and sync the counter
+        aiService.resetQuestionTracking();
+        // Manually increment counters to match answered questions
+        for (let i = 0; i < easyCount; i++) {
+          aiService["questionCountByDifficulty"].easy++;
+        }
+        for (let i = 0; i < mediumCount; i++) {
+          aiService["questionCountByDifficulty"].medium++;
+        }
+        for (let i = 0; i < hardCount; i++) {
+          aiService["questionCountByDifficulty"].hard++;
+        }
+        console.log(`✅ AI counter synced!`);
 
         const candidateIndex = state.candidates.findIndex(
           (c) => c.id === state.currentCandidate!.id
