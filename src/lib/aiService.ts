@@ -216,6 +216,17 @@ class AIService {
     };
   }
 
+  // Sync question counter when resuming an interview
+  syncQuestionCounter(easyCount: number, mediumCount: number, hardCount: number): void {
+    console.log(`🔄 Syncing question counter: Easy=${easyCount}, Medium=${mediumCount}, Hard=${hardCount}`);
+    this.questionCountByDifficulty = {
+      easy: easyCount,
+      medium: mediumCount,
+      hard: hardCount,
+    };
+    console.log(`✅ Counter synced successfully!`);
+  }
+
   async generateQuestion(
     difficulty: QuestionDifficulty,
     candidateContext?: { skills?: string[]; experience?: string; name?: string }

@@ -251,6 +251,32 @@ const interviewSlice = createSlice({
 
       if (state.currentCandidate) {
         state.currentCandidate.status = "in-progress";
+
+        // Reset AI service counter based on already answered questions
+        const answeredQuestions = state.currentCandidate.answers;
+        const easyCount = answeredQuestions.filter(
+          (a) => a.difficulty === "easy"
+        ).length;
+        const mediumCount = answeredQuestions.filter(
+          (a) => a.difficulty === "medium"
+        ).length;
+        const hardCount = answeredQuestions.filter(
+          (a) => a.difficulty === "hard"
+        ).length;
+
+        console.log(
+          `🔄 Resuming interview - syncing AI counter with answered questions:`
+        );
+        console.log(
+          `   Easy: ${easyCount}, Medium: ${mediumCount}, Hard: ${hardCount}`
+        );
+        console.log(
+          `   Current question index: ${state.currentCandidate.currentQuestionIndex}`
+        );
+
+        // Sync the counter to match answered questions
+        aiService.syncQuestionCounter(easyCount, mediumCount, hardCount);
+
         const candidateIndex = state.candidates.findIndex(
           (c) => c.id === state.currentCandidate!.id
         );
