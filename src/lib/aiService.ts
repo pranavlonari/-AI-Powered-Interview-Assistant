@@ -121,10 +121,10 @@ class AIService {
             },
           ],
           generationConfig: {
-            temperature: 0.7,
-            topK: 40,
-            topP: 0.95,
-            maxOutputTokens: 1000,
+            temperature: 0.3,
+            topK: 20,
+            topP: 0.8,
+            maxOutputTokens: 2048,
           },
         };
 
@@ -216,17 +216,6 @@ class AIService {
     };
   }
 
-  // Sync question counter when resuming an interview
-  syncQuestionCounter(easyCount: number, mediumCount: number, hardCount: number): void {
-    console.log(`🔄 Syncing question counter: Easy=${easyCount}, Medium=${mediumCount}, Hard=${hardCount}`);
-    this.questionCountByDifficulty = {
-      easy: easyCount,
-      medium: mediumCount,
-      hard: hardCount,
-    };
-    console.log(`✅ Counter synced successfully!`);
-  }
-
   async generateQuestion(
     difficulty: QuestionDifficulty,
     candidateContext?: { skills?: string[]; experience?: string; name?: string }
@@ -254,13 +243,6 @@ class AIService {
 
     console.log(`✅ Final difficulty AFTER enforcement: ${difficulty}`);
 
-    const timeLimit =
-      difficulty === "easy"
-        ? "20 seconds"
-        : difficulty === "medium"
-        ? "60 seconds"
-        : "120 seconds";
-
     // Create personalized context
     const contextInfo = candidateContext
       ? `
@@ -277,28 +259,12 @@ Please tailor the question to be relevant to their background while maintaining 
 
     // For EASY questions, generate MCQ format
     if (difficulty === "easy") {
-      const prompt = `🚀 MULTIPLE CHOICE QUESTION GENERATION
+      const prompt = `Generate an EASY level multiple choice question for Full Stack (React/Node) interview.
 
-Generate an EASY level technical MCQ (Multiple Choice Question) for a Full Stack (React/Node) role.
-
-📋 REQUIREMENTS:
-🟢 EASY Level MCQ (20 seconds to answer):
-- Fundamental React or Node.js concepts
-- Quick recall of basic syntax and definitions
-- Clear, unambiguous question with 4 options
-- Only ONE correct answer
-- Examples: React hooks basics, Node.js modules, JavaScript fundamentals, npm commands
-
-🎯 TECHNICAL FOCUS AREAS:
-- React.js (hooks, components, JSX basics)
-- Node.js (modules, npm, basic concepts)  
-- JavaScript/TypeScript (ES6+ syntax, data types)
-- Basic web development concepts
-
+Topic areas: React basics, Node.js fundamentals, JavaScript ES6+, basic web development.
 ${contextInfo}
 
-⏱️ TIME: Must be answerable in ${timeLimit}
-🎯 FORMAT: Return as JSON object with this structure:
+Return JSON format:
 {
   "question": "Your question here?",
   "options": [
@@ -308,12 +274,10 @@ ${contextInfo}
     "Option D"
   ],
   "correctAnswer": "Exact text of correct option"
-}
-
-RETURN ONLY THE JSON, NO MARKDOWN, NO EXPLANATIONS.`;
+}`;
 
       const systemInstruction =
-        "You are an expert technical interviewer. Generate clear MCQ questions for full-stack developers. Return ONLY valid JSON.";
+        "Generate clear MCQ questions for full-stack developers. Return only valid JSON.";
 
       try {
         const response = await this.makeGeminiRequest(
@@ -364,63 +328,21 @@ RETURN ONLY THE JSON, NO MARKDOWN, NO EXPLANATIONS.`;
     }
 
     // For MEDIUM and HARD questions, use text-based format
-    const prompt = `🚀 REAL-TIME INTERVIEW QUESTION GENERATION
+    const prompt = `Generate a ${difficulty.toUpperCase()} level technical interview question for Full Stack (React/Node) role.
 
-Generate a ${difficulty.toUpperCase()} level technical interview question for a Full Stack (React/Node) role.
-
-📋 REQUIREMENTS:
 ${
   difficulty === "medium"
-    ? `
-🟡 MEDIUM Level (60 seconds to answer):
-- ONE SPECIFIC practical React/Node.js concept that can be explained in 60 seconds
-- Ask for a brief explanation (3-4 sentences) OR a short code example (4-6 lines)
-- Focus on a SINGLE concept only (not multiple topics)
-- Real-world scenarios: hooks, state management, API integration, middleware
-- Examples: 
-  * "Explain why we need useEffect cleanup function and give one example"
-  * "Write a simple Express middleware to log request method and URL"
-  * "How do you prevent unnecessary re-renders in React functional components?"
-- Answer should be: 3-5 sentences of explanation OR 4-6 lines of code with 1-2 sentence explanation
-- Question must be SPECIFIC enough that a competent developer can answer in 60 seconds
-- Worth 15 points - give full 100% score for correct, complete answers`
-    : ""
-}${
-      difficulty === "hard"
-        ? `
-🔴 HARD Level (120 seconds to answer):
-- ONE SPECIFIC advanced full-stack concept answerable in 2 minutes
-- Ask for approach/solution explanation (5-7 sentences) OR code example (6-10 lines) with explanation
-- Focus on a SINGLE advanced topic with practical application
-- Advanced topics: performance optimization, scalability, architecture patterns, advanced async
-- Examples:
-  * "Explain how you would implement debouncing in React and show a custom hook example"
-  * "Describe the approach to handle concurrent API requests in Node.js with proper error handling"
-  * "How would you optimize a React component that renders a large list (1000+ items)?"
-- Answer should be: 5-7 sentences explaining the approach OR 6-10 lines of code with 2-3 sentence explanation
-- Question must be SPECIFIC with clear scope that allows a complete answer in 120 seconds
-- Worth 30 points - give full 100% score for correct, comprehensive answers`
-        : ""
-    }
+    ? "MEDIUM: Practical React/Node.js concept answerable in 60 seconds. Ask for brief explanation or short code example."
+    : "HARD: Advanced full-stack concept answerable in 2 minutes. Ask for approach explanation or code example with explanation."
+}
 
-🎯 TECHNICAL FOCUS AREAS:
-- React.js (hooks, state management, performance)
-- Node.js (APIs, middleware, async programming)  
-- JavaScript/TypeScript (ES6+, advanced concepts)
-- Database design and optimization
-- System architecture and scalability
-- Full stack integration challenges
-
+Topics: React hooks, Node.js APIs, JavaScript ES6+, state management, performance optimization, async programming.
 ${contextInfo}
 
-⏱️ TIME CONSTRAINT: Must be answerable in ${timeLimit}
-🎪 MAKE IT ENGAGING: Real-world scenario preferred
-🔍 CLARITY: Question should be crystal clear and specific
-
-Return ONLY the question text, no additional formatting or explanations.`;
+Return only the question text.`;
 
     const systemInstruction =
-      "You are an expert technical interviewer. Generate high-quality interview questions that test practical skills for full-stack developers.";
+      "Generate high-quality interview questions for full-stack developers.";
 
     const question = await this.makeGeminiRequest(prompt, systemInstruction);
 
@@ -549,13 +471,10 @@ Return ONLY the question text, no additional formatting or explanations.`;
       difficulty === "easy" ? 20 : difficulty === "medium" ? 60 : 120;
     const timeUsagePercent = Math.round((timeSpent / maxTime) * 100);
 
-    const prompt = `🎯 STRICT TECHNICAL INTERVIEW EVALUATION
+    const prompt = `Score this ${difficulty} level Full Stack Developer interview answer (0-100%):
 
-QUESTION (${difficulty.toUpperCase()} level):
-${question}
-
-CANDIDATE'S ANSWER:
-${answer}
+QUESTION: ${question}
+ANSWER: ${answer}
 
 ⏱️ TIMING:
 - Time spent: ${timeSpent}s / ${maxTime}s (${timeUsagePercent}%)
@@ -610,17 +529,14 @@ ${
     : ""
 }
 
-RETURN JSON:
+Return JSON:
 {
-  "score": [80-100 for somewhat relevant, 0-50 for wrong],
-  "feedback": "[Positive feedback - what was good]",
-  "reasoning": "[Brief explanation]"
-}
+  "score": 85,
+  "feedback": "Brief positive feedback",
+  "reasoning": "Short explanation"
+}`;
 
-BE VERY LENIENT. Give 80-100% for any somewhat relevant answer. Only low scores for completely wrong answers.`;
-
-    const systemInstruction = `Very lenient interviewer. Give 80-100% for any somewhat relevant answer that shows understanding.
-Default to HIGH SCORES. Only give 0-50% for completely wrong/irrelevant answers. Be generous!`;
+    const systemInstruction = `Be lenient. Give 80-100% for relevant answers. Return valid JSON only.`;
 
     try {
       const response = await this.makeGeminiRequest(prompt, systemInstruction);
@@ -756,58 +672,29 @@ Provide a JSON response with:
     const textChunk =
       text.length > 3000 ? text.substring(0, 3000) + "..." : text;
 
-    const prompt = `🎯 REAL-TIME RESUME ANALYSIS - Extract contact information with maximum accuracy from this ACTUAL resume:
+    const prompt = `Extract information from this resume text and return only valid JSON:
 
-📋 EXTRACTION TARGETS:
-
-1. 👤 FULL NAME:
-   - The person's actual name (typically at the top)
-   - Format: "First Last" or "First Middle Last"
-   - EXCLUDE: Job titles, company names, certifications
-   - REAL EXAMPLE from text: Look for names like "John Smith", "Sarah Johnson", "Michael Chen"
-
-2. 📧 EMAIL ADDRESS:
-   - Valid working email format only
-   - Must contain @ and valid domain (.com, .org, .edu, etc.)
-   - EXCLUDE: example@example.com, test@test.com, sample emails
-   - REAL EXAMPLE: "john.smith@gmail.com", "sarah@company.com"
-
-3. 📱 PHONE NUMBER:
-   - Actual contact phone number (10-11 digits)
-   - Formats: (555) 123-4567, 555-123-4567, +1-555-123-4567
-   - EXCLUDE: Years (2020, 2021), dates (01/01/2020), ID numbers
-   - VERIFY: Must be realistic phone number starting with valid area code
-
-4. 💼 EXPERIENCE LEVEL:
-   - Determine from years mentioned, job history, or education level
-   - Options: "Entry Level", "Mid Level", "Senior Level", "Executive"
-
-5. 🛠️ KEY SKILLS:
-   - Technical skills relevant to Full Stack Development
-   - Extract from skills section, job descriptions, or projects
-   - Focus on: Programming languages, frameworks, tools, databases
-
-RESUME CONTENT TO ANALYZE:
+RESUME TEXT:
 ${textChunk}
 
-🔍 PROCESSING INSTRUCTIONS:
-- Scan the ENTIRE text systematically
-- Cross-validate findings with context
-- If field is uncertain or invalid, return null
-- Use REAL data only, no assumptions
-- Process with production-level accuracy
+Extract:
+- name: Full name of the person (string or null)
+- email: Email address (string or null) 
+- phone: Phone number (string or null)
+- experience: Experience level from "Entry Level", "Mid Level", "Senior Level", "Executive"
+- skills: Array of technical skills related to software development
 
-📤 RETURN FORMAT (JSON only):
+Return only JSON in this exact format:
 {
-  "name": "Actual Name Found" or null,
-  "email": "real@email.com" or null,
+  "name": "Full Name" or null,
+  "email": "email@domain.com" or null,
   "phone": "555-123-4567" or null,
-  "experience": "Experience Level Based on Content",
-  "skills": ["React", "JavaScript", "Node.js", "etc"]
+  "experience": "Mid Level",
+  "skills": ["JavaScript", "React", "Node.js"]
 }`;
 
     const systemInstruction =
-      "You are a production-grade resume parser with 99.9% accuracy. Your job is to extract name, email, and phone with perfect precision. Scan the entire text thoroughly. Return only valid JSON. This is critical for a production system.";
+      "You are a resume parser. Extract the requested information accurately and return only valid JSON. No explanations.";
 
     console.log("🚀 Sending request to Gemini API...");
     const response = await this.makeGeminiRequest(prompt, systemInstruction);
