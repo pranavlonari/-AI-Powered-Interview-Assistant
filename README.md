@@ -45,7 +45,7 @@ The application supports **local persistence**, so all progress is saved even af
 
 - **Frontend:** React  
 - **State Management & Persistence:** Redux + redux-persist / IndexedDB  
-- **UI Components:** Ant Design / shadcn (modern responsive UI)  
+- **UI Components:** Ant Design / shadcn (modern responsive UI )  
 - **Resume Parsing:** PDF/DOCX text extraction libraries  
 - **AI Logic:** Dynamic question generation & scoring system  
 - **Storage:** Local persistence for timers, answers, and progress  
